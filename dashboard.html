@@ -539,7 +539,7 @@ function renderModel(){
       '<td><span class="'+(p.pnlPct>=0?'pos':'neg')+'">'+(p.pnlPct||0).toFixed(1)+'%</span></td>'+
       '<td>'+st+'</td>'+
       '<td><a class="tv" href="https://www.tradingview.com/chart/?symbol='+(MARKET==='NSE'?'NSE%3A':'')+p.symbol+'&interval=D" target="_blank">↗</a></td>'+
-      '<td style="color:var(--muted);font-size:11px;font-family:monospace">'+p.entryDate+'</td></tr>';
+      '<td style="color:var(--muted);font-size:11px;text-align:center">'+p.daysHeld+'d</td></tr>';
   }).join('');
   var jRows=jrnl.slice(-10).reverse().map(function(j){
     var ac=j.action==='ENTRY'?'<span class="bb" style="font-size:10px">ENTRY</span>':j.action==='TARGET HIT'?'<span class="st-hit" style="font-size:10px">HIT</span>':'<span class="st-stop" style="font-size:10px">STOP</span>';
@@ -549,7 +549,7 @@ function renderModel(){
       '<td style="color:var(--muted);font-size:11px">'+j.notes+'</td></tr>';
   }).join('');
   return cards+
-    '<div class="tw" style="margin-bottom:10px"><table><thead><tr><th>Symbol</th><th>Entry</th><th>Stop</th><th>Target</th><th>P&L%</th><th>Status</th><th>Chart</th><th>Date</th></tr></thead><tbody>'+posRows+'</tbody></table></div>'+
+    '<div class="tw" style="margin-bottom:10px"><table><thead><tr><th>Symbol</th><th>Entry</th><th>Stop</th><th>Target</th><th>P&L%</th><th>Status</th><th>Chart</th><th>Days</th></tr></thead><tbody>'+posRows+'</tbody></table></div>'+
     '<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px">Journal</div>'+
     '<div class="tw"><table><thead><tr><th>Date</th><th>Symbol</th><th>Action</th><th>Price</th><th>P&L%</th><th>Notes</th></tr></thead><tbody>'+jRows+'</tbody></table></div>';
 }
@@ -596,16 +596,15 @@ function renderJournal(){
     '<div class="card"><div class="card-l">Losers</div><div class="card-v" style="color:var(--red)">'+(j.length-won)+'</div></div>'+
     '<div class="card"><div class="card-l">Win Rate</div><div class="card-v" style="color:var(--accent)">'+(j.length?Math.round(won/j.length*100):0)+'%</div></div>'+
     '</div>';
-  return cards+'<div class="tw"><table><thead><tr><th>Symbol</th><th>Entry</th><th>Exit</th><th>Entry $</th><th>Exit $</th><th>P&L $</th><th>P&L %</th><th>Chart</th></tr></thead><tbody>'+
+  return cards+'<div class="tw"><table><thead><tr><th>Symbol</th><th>Entry $</th><th>Exit $</th><th>P&L $</th><th>P&L %</th><th>Chart</th><th>Date</th><th>Exit Date</th></tr></thead><tbody>'+
     j.map(function(r){
       return '<tr><td class="sym">'+r.symbol+'</td>'+
-        '<td style="color:var(--muted);font-size:11px">'+r.entryDate+'</td>'+
-        '<td style="color:var(--muted);font-size:11px">'+r.exitDate+'</td>'+
         '<td class="price">$'+(r.entryPrice||0).toFixed(2)+'</td>'+
         '<td class="price">$'+(r.exitPrice||0).toFixed(2)+'</td>'+
         '<td><span class="'+(r.pnl>=0?'pos':'neg')+'">$'+(r.pnl||0).toFixed(2)+'</span></td>'+
         '<td><span class="'+(r.pnlPct>=0?'pos':'neg')+'">'+(r.pnlPct||0).toFixed(1)+'%</span></td>'+
-        '<td><a class="tv" href="https://www.tradingview.com/chart/?symbol='+r.symbol+'&interval=D" target="_blank">↗</a></td></tr>';
+        '<td><a class="tv" href="https://www.tradingview.com/chart/?symbol='+r.symbol+'&interval=D" target="_blank">↗</a></td>'+
+        '<td style="color:var(--muted);font-size:10px">'+r.entryDate+'</td></tr>';
     }).join('')+'</tbody></table></div>';
 }
 
