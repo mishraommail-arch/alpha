@@ -384,7 +384,7 @@ function renderScreenerShell(){
     '<button class="ibtn" onclick="exportCSV()">⬇ CSV</button>'+
     '<button class="ibtn" onclick="loadData()">↺</button></div></div>'+
     '<div class="tw"><table><thead><tr>'+
-    '<th>Rank</th><th>Symbol</th><th>Sector</th><th>Cap</th><th>Price</th><th>Signal</th><th>Chart</th>'+
+    '<th>Rank</th><th>Symbol</th><th>Price</th><th>Signal</th><th>Chart</th><th>Cap</th><th>Sector</th>'+
     '</tr></thead><tbody id="tbody"></tbody></table></div>';
 }
 
@@ -471,11 +471,11 @@ function paintTable(){
     return '<tr>'+
       '<td><span class="rk '+rk+'">'+s.rank+'</span></td>'+
       '<td><span class="sym">'+s.symbol+'</span>'+tags+'</td>'+
-      '<td style="color:var(--muted);max-width:90px;overflow:hidden;text-overflow:ellipsis">'+s.sector+'</td>'+
-      '<td><span class="cat '+cc+'">'+cl+'</span></td>'+
       '<td class="price">'+cur+pr+'</td>'+
       '<td>'+sig+'</td>'+
       '<td><a class="tv" href="https://www.tradingview.com/chart/?symbol='+tvp+s.symbol+'&interval=D" target="_blank">↗</a></td>'+
+      '<td><span class="cat '+cc+'">'+cl+'</span></td>'+
+      '<td style="color:var(--muted);max-width:90px;overflow:hidden;text-overflow:ellipsis">'+s.sector+'</td>'+
       '</tr>';
   }).join('');
   if(document.getElementById('tTitle'))document.getElementById('tTitle').textContent=FILTERED.length+' signals';
