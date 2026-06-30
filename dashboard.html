@@ -151,7 +151,7 @@ tr:hover td{background:var(--s2)}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
 </style>
 </head>
-<body class="t-dark">
+<body class="t-light">
 
 <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
 
@@ -278,7 +278,7 @@ function setTheme(n,dot){
   localStorage.setItem('ai_th',n);
 }
 (function(){
-  var t=localStorage.getItem('ai_th')||'dark';
+  var t=localStorage.getItem('ai_th')||'light';
   document.body.className='t-'+t;
   var d=document.querySelector('.td-'+t);
   if(d){document.querySelectorAll('.td').forEach(function(x){x.classList.remove('on');});d.classList.add('on');}
@@ -596,7 +596,7 @@ function renderJournal(){
     '<div class="card"><div class="card-l">Losers</div><div class="card-v" style="color:var(--red)">'+(j.length-won)+'</div></div>'+
     '<div class="card"><div class="card-l">Win Rate</div><div class="card-v" style="color:var(--accent)">'+(j.length?Math.round(won/j.length*100):0)+'%</div></div>'+
     '</div>';
-  return cards+'<div class="tw"><table><thead><tr><th>Symbol</th><th>Entry $</th><th>Exit $</th><th>P&L $</th><th>P&L %</th><th>Chart</th><th>Date</th><th>Exit Date</th></tr></thead><tbody>'+
+  return cards+'<div class="tw"><table><thead><tr><th>Symbol</th><th>Entry $</th><th>Exit $</th><th>P&L $</th><th>P&L %</th><th>Chart</th><th>Date</th></tr></thead><tbody>'+
     j.map(function(r){
       return '<tr><td class="sym">'+r.symbol+'</td>'+
         '<td class="price">$'+(r.entryPrice||0).toFixed(2)+'</td>'+
