@@ -457,6 +457,60 @@ function paintTable(){
   }).join("");
   var tt=document.getElementById("tTitle");
   if(tt) tt.textContent=FILTERED.length+" signals";
+  // Auto-fetch live prices for US market
+  fetchLivePrices(); // works for both NSE and US
+}
+
+function fetchLivePrices(){
+  var pool = getTabData();
+  if(!pool.length) return;
+  
+  var symbols = pool.map(function(s){ return s.symbol; });
+  var url     = getUrl(); // same Apps Script URL
+  var BATCH   = 50;
+  var priceMap = {};
+  var batches  = [];
+  
+  for(var i=0; i<symbols.length; i+=BATCH){
+    batches.push(symbols.slice(i, i+BATCH));
+  }
+  
+  var done = 0;
+  function next(){
+    if(done >= batches.length){
+      updatePriceCells(priceMap);
+      return;
+    }
+    var syms = batches[done].join(",");
+    fetch(url + "?action=live&symbols=" + encodeURIComponent(syms))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        Object.keys(data).forEach(function(sym){
+          if(sym !== "_error") priceMap[sym] = data[sym];
+        });
+        done++;
+        setTimeout(next, 200);
+      })
+      .catch(function(){ done++; setTimeout(next, 200); });
+  }
+  next();
+}
+
+function updatePriceCells(priceMap){
+  var rows=document.querySelectorAll("#tbody tr");
+  rows.forEach(function(row){
+    var symCell=row.querySelector("td:nth-child(2)");
+    if(!symCell) return;
+    var sym=symCell.textContent.replace(/NEW|own|F&O/g,"").trim();
+    var data=priceMap[sym];
+    if(!data||!data.price) return;
+    var priceCell=row.querySelector("td:nth-child(3)");
+    if(priceCell){
+      var color=data.chg>=0?"#10b981":"#ef4444";
+      var sign=data.chg>=0?"+":"";
+      priceCell.innerHTML="<span style='font-family:monospace;font-weight:600'>$"+data.price.toFixed(2)+"</span><span style='font-size:10px;color:"+color+"'> "+sign+data.chg.toFixed(1)+"%</span>";
+    }
+  });
 }
 
 function renderSectors(){
@@ -617,6 +671,10 @@ function exportCSV(){
   }
   buildTabbar();
   loadData();
+  // Auto refresh live prices every 60 seconds for US
+  setInterval(function(){
+    if(document.getElementById("tbody")) fetchLivePrices();
+  }, 60000);
 })();
 </script>
 <script>
