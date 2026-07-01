@@ -448,7 +448,7 @@ function paintTable(){
     return "<tr>"+
       "<td><span class=\"rk "+rk+"\">"+s.rank+"</span></td>"+
       "<td><span class=\"sym\">"+s.symbol+"</span>"+tags+"</td>"+
-      "<td class=\"price\">"+cur+pr+"</td>"+
+      "<td class=\"price\" id=\"live-"+s.symbol+"\"><span style=\"color:var(--muted)\">...</span></td>"+
       "<td>"+sig+"</td>"+
       "<td><a class=\"tv\" href=\"https://www.tradingview.com/chart/?symbol="+tvp+s.symbol+"&interval=D\" target=\"_blank\">&#8599;</a></td>"+
       "<td><span class=\"cat "+cc+"\">"+cl+"</span></td>"+
@@ -497,19 +497,14 @@ function fetchLivePrices(){
 }
 
 function updatePriceCells(priceMap){
-  var rows=document.querySelectorAll("#tbody tr");
-  rows.forEach(function(row){
-    var symCell=row.querySelector("td:nth-child(2)");
-    if(!symCell) return;
-    var sym=symCell.textContent.replace(/NEW|own|F&O/g,"").trim();
-    var data=priceMap[sym];
-    if(!data||!data.price) return;
-    var priceCell=row.querySelector("td:nth-child(3)");
-    if(priceCell){
-      var color=data.chg>=0?"#10b981":"#ef4444";
-      var sign=data.chg>=0?"+":"";
-      priceCell.innerHTML="<span style='font-family:monospace;font-weight:600'>$"+data.price.toFixed(2)+"</span><span style='font-size:10px;color:"+color+"'> "+sign+data.chg.toFixed(1)+"%</span>";
-    }
+  var isN=MARKET==="NSE", cur=isN?"Rs.":"$";
+  Object.keys(priceMap).forEach(function(sym){
+    var el=document.getElementById("live-"+sym);
+    var d=priceMap[sym];
+    if(!el||!d||!d.price) return;
+    var color=d.chg>=0?"#10b981":"#ef4444";
+    var sign=d.chg>=0?"+":"";
+    el.innerHTML="<span style='font-family:monospace;font-weight:600'>"+cur+d.price.toFixed(2)+"</span><span style='font-size:10px;color:"+color+"'> "+sign+d.chg.toFixed(1)+"%</span>";
   });
 }
 
@@ -565,14 +560,14 @@ function renderModel(){
   var posRows=pos.map(function(p){
     var st=p.status==="OPEN"?"<span class=\"st-open\">OPEN</span>":p.status==="TARGET HIT"?"<span class=\"st-hit\">HIT</span>":"<span class=\"st-stop\">STOP</span>";
     return "<tr><td class=\"sym\" id=\"mp-"+p.symbol+"\">"+p.symbol+"</td>"+
+      "<td class=\"price\" id=\"mp-live-"+p.symbol+"\"><span style=\"color:var(--muted)\">...</span></td>"+
       "<td><span class=\""+(p.pnlPct>=0?"pos":"neg")+"\">"+(p.pnlPct||0).toFixed(1)+"%</span></td>"+
       "<td>"+st+"</td>"+
       "<td><a class=\"tv\" href=\"https://www.tradingview.com/chart/?symbol="+(MARKET==="NSE"?"NSE%3A":"")+p.symbol+"&interval=D\" target=\"_blank\">&#8599;</a></td>"+
       "<td class=\"dt\">"+p.daysHeld+"d</td>"+
       "<td class=\"price\">"+cur+(p.entryPrice||0).toFixed(2)+"</td>"+
       "<td style=\"color:var(--red);font-family:monospace;font-size:11px\">"+cur+(p.stopLoss||0).toFixed(2)+"</td>"+
-      "<td style=\"color:var(--green);font-family:monospace;font-size:11px\">"+cur+(p.target||0).toFixed(2)+"</td>"+
-      "<td class=\"price\" id=\"mp-live-"+p.symbol+"\"><span style=\"color:var(--muted)\">...</span></td></tr>";
+      "<td style=\"color:var(--green);font-family:monospace;font-size:11px\">"+cur+(p.target||0).toFixed(2)+"</td></tr>";
   }).join("");
   var jRows=jrnl.slice(-10).reverse().map(function(j){
     var ac=j.action==="ENTRY"?"<span class=\"bb\" style=\"font-size:10px\">ENTRY</span>":j.action==="TARGET HIT"?"<span class=\"st-hit\" style=\"font-size:10px\">HIT</span>":"<span class=\"st-stop\" style=\"font-size:10px\">STOP</span>";
@@ -584,7 +579,7 @@ function renderModel(){
   }).join("");
   setTimeout(function(){fetchModelPrices(pos);},500);
   return cards+
-    "<div class=\"tw\" style=\"margin-bottom:10px\"><table><thead><tr><th>Symbol</th><th>P&L%</th><th>Status</th><th>Chart</th><th>Days</th><th>Entry</th><th>Stop</th><th>Target</th><th>Live Price</th></tr></thead><tbody>"+posRows+"</tbody></table></div>"+
+    "<div class=\"tw\" style=\"margin-bottom:10px\"><table><thead><tr><th>Symbol</th><th>Live Price</th><th>P&L%</th><th>Status</th><th>Chart</th><th>Days</th><th>Entry</th><th>Stop</th><th>Target</th></tr></thead><tbody>"+posRows+"</tbody></table></div>"+
     "<div style=\"font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px\">Journal</div>"+
     "<div class=\"tw\"><table><thead><tr><th>Symbol</th><th>Action</th><th>Price</th><th>P&L%</th><th>Notes</th><th>Date</th></tr></thead><tbody>"+jRows+"</tbody></table></div>";
 }
