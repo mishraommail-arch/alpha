@@ -482,7 +482,7 @@ function fetchLivePrices(){
       return;
     }
     var syms = batches[done].join(",");
-    fetch(url + "?action=live&symbols=" + encodeURIComponent(syms))
+    fetch(url + "?action=live&symbols=" + encodeURIComponent(syms), {redirect:"follow"})
       .then(function(r){ return r.json(); })
       .then(function(data){
         Object.keys(data).forEach(function(sym){
@@ -593,7 +593,7 @@ function fetchModelPrices(positions){
   if(!positions||!positions.length) return;
   var symbols=positions.map(function(p){return p.symbol;}).join(",");
   var url=getUrl()+"?action=live&symbols="+encodeURIComponent(symbols);
-  fetch(url)
+  fetch(url, {redirect:"follow"})
     .then(function(r){return r.json();})
     .then(function(data){
       var cur=MARKET==="NSE"?"Rs.":"$";
