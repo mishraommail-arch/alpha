@@ -204,18 +204,7 @@ tr:hover td{background:var(--s2)}
 var NSE_URL="https://script.google.com/macros/s/AKfycbxf48IaOaZtOBtZWf_RT8vUyR_6GqJJjJrivpgESy5Ha5F2igauMrqdXtkNMkXd2CxsZw/exec";
 var US_URL="https://script.google.com/macros/s/AKfycbwcmvvMvgzifuawd6cHOOuymyYJeswHzDqTmPl3EdNsYTeTx8HfP6l7UMJxQ4NG7koo/exec";
 var D={tabs:{},portfolio:[],modelPortfolio:{positions:[],journal:[]},history:[],watchlist:[],journal:[],log:""};
-var CACHE_TTL=60*60*1000; // 60 min
-var NSE_CACHE=null, NSE_CACHE_TS=0;
-var US_CACHE=null,  US_CACHE_TS=0;
-
-function getCached(mkt){
-  if(mkt==="NSE") return (NSE_CACHE&&(Date.now()-NSE_CACHE_TS)<CACHE_TTL)?NSE_CACHE:null;
-  return (US_CACHE&&(Date.now()-US_CACHE_TS)<CACHE_TTL)?US_CACHE:null;
-}
-function setCached(mkt,data){
-  if(mkt==="NSE"){NSE_CACHE=data;NSE_CACHE_TS=Date.now();}
-  else{US_CACHE=data;US_CACHE_TS=Date.now();}
-}
+// No cache - always fresh data
 var FILTERED=[],ACTIVE_SECTOR="",MARKET="NSE",ACTIVE_TAB="ALL";
 var NSE_TABS=[
   {id:"ALL",label:"ALL"},{id:"LC",label:"LARGE CAP"},{id:"MC",label:"MID CAP"},
@@ -308,16 +297,6 @@ function forceLoad(){
 
 function loadData(){
   var mc=document.getElementById("mainContent");
-
-  // Check cache
-  var cached=getCached(MARKET);
-  if(cached){
-    D=cached;
-    buildSectorSelect();
-    updateTabCounts();
-    renderTab();
-    return;
-  }
 
   var quotes=[
     "Anything can happen. — Mark Douglas",
@@ -438,6 +417,8 @@ function loadData(){
   fetch(getUrl())
     .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
     .then(function(data){
+      // Verify market matches what we requested
+      if(data.market && data.market !== MARKET) return; // stale response, ignore
       D=data;
       if(!D.tabs) D.tabs={};
       if(!D.modelPortfolio) D.modelPortfolio={positions:[],journal:[]};
@@ -445,7 +426,6 @@ function loadData(){
       if(!D.watchlist) D.watchlist=[];
       if(!D.journal) D.journal=[];
       if(!D.log) D.log="";
-      setCached(MARKET, D);
       buildSectorSelect();
       updateTabCounts();
       renderTab();
@@ -845,13 +825,10 @@ function exportCSV(){
 })();
 </script>
 <script>
+// Unregister any old service workers
 if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      console.log('SW registered');
-    }).catch(function(err){
-      console.log('SW error:', err);
-    });
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){r.unregister();});
   });
 }
 </script>
